@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pinecone-async-client"
+version = "0.1.0"
+description = "Async client for Pinecone API"
+authors = ["Luca Mannini <48441989+italianconcerto@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "pinecone_async", from = "src"}]  # This line is crucial
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiohttp = "^3.8.0"
+pydantic = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+testpaths = ["tests"]
+python_files = "test_*.py"
