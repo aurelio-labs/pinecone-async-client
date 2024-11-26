@@ -1,21 +1,26 @@
-# tests/conftest.py
-from pinecone_async.client import PineconeClient
 import pytest
-import aiohttp
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 @pytest.fixture
-def mock_session():
-    with patch('aiohttp.ClientSession') as mock:
-        session = AsyncMock()
-        mock.return_value.__aenter__.return_value = session
-        yield session
+def mock_pinecone_response():
+    """Create a mock response that properly handles async context management"""
+    def _make_response(status=200, json_data=None, text_data=None):
+        mock_response = AsyncMock()
+        mock_response.status = status
+        mock_response.json.return_value = json_data
+        mock_response.text.return_value = text_data or ""
+        return mock_response
+    return _make_response
 
-# tests/test_client.py
-@pytest.mark.asyncio
-async def test_list_indexes(mock_session):
-    mock_session.get.return_value.__aenter__.return_value.json.return_value = [{"name": "test-index"}]
+@pytest.fixture
+def mock_pinecone_session():
+    """Create a mock session with proper async context management"""
+    async def _make_context_manager(response):
+        mock_cm = AsyncMock()
+        mock_cm.__aenter__.return_value = response
+        mock_cm.__aexit__.return_value = None
+        return mock_cm
     
-    client = PineconeClient(api_key="fake-key")
-    indexes = await client.list_indexes()
-    assert indexes == [{"name": "test-index"}]
+    session = AsyncMock()
+    session._make_context_manager = _make_context_manager
+    return session

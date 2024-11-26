@@ -1,5 +1,6 @@
 from .client import PineconeClient
-from .schema import IndexResponse, PineconePod, Serverless
+from .schema import Serverless, PineconePod, IndexResponse
+from .exceptions import IndexNotFoundError
 
-__all__ = ["PineconeClient", "IndexResponse", "PineconePod", "Serverless"]
+__all__ = ["PineconeClient", "Serverless", "PineconePod", "IndexResponse", "IndexNotFoundError"]
 __version__ = "0.1.0"
