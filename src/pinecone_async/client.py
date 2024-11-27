@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, List, Literal
 
 import httpx
@@ -19,7 +20,14 @@ class PineconeClient:
             "Content-Type": "application/json",
             "X-Pinecone-API-Version": "2024-07",
         }
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("PINECONE_API_KEY")
+
+        if not self.api_key:
+            raise ValueError(
+                "api_key is required, "
+                "either pass it as an argument or set the PINECONE_API_KEY environment variable"
+            )
+
         self.base_url = base_url
         self.client = httpx.AsyncClient(headers=self.headers)
 
