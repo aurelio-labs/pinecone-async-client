@@ -1,6 +1,6 @@
 [project]
 name = "pinecone-async-client"
-version = "0.1.0"
+version = "0.0.1"
 description = "Async client for Pinecone API"
 authors = [
     { name = "Luca Mannini", email = "dev@lucamannini.com" }
