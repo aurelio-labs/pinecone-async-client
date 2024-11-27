@@ -72,7 +72,7 @@ async def test_upsert_vectors(index):
 
 @pytest.mark.asyncio
 async def test_debug():
-    print("\n=== Starting test ===")
+    
     with patch('httpx.AsyncClient.get', return_value=httpx.Response(200, json=MOCK_INDEX_RESPONSE)):
         index = await PineconeIndex.create(
             api_key="test-key",
@@ -81,7 +81,6 @@ async def test_debug():
             dimensions=8,
             region="us-east-1"
         )
-        print(f"Index type: {type(index)}")
         assert hasattr(index, 'delete'), "Index doesn't have delete method"
         assert callable(index.delete), "Delete is not callable"
         
