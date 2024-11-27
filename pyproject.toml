@@ -1,6 +1,6 @@
 [project]
 name = "pinecone-async-client"
-version = "0.1.0"
+version = "0.0.1"
 description = "Async client for Pinecone API"
 authors = [
     { name = "Luca Mannini", email = "dev@lucamannini.com" }
@@ -21,6 +21,8 @@ classifiers = [
 dependencies = [
     "httpx>=0.27.2",
     "pydantic>=2.0.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
 ]
 keywords = ["pinecone", "vector database", "async", "client"]
 
@@ -33,6 +35,10 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_fixture_loop_scope = "function"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pinecone_async"]

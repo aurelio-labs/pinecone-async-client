@@ -109,7 +109,7 @@ async def main():
                    region="us-east-1"
                )
            )
-           print(new_index)
+
 
            
            print("\n=== Describing index ===")

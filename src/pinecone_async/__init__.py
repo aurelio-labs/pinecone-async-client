@@ -1,6 +1,33 @@
+# src/pinecone_async/__init__.py
 from .client import PineconeClient
-from .schema import Serverless, PineconePod, IndexResponse
+from .index import PineconeIndex
+from .schema import (
+    Serverless,
+    PineconePod,
+    IndexResponse,
+    PineconeVector,
+    VectorMetadata,
+    SparseValues,
+    QueryResponse,
+    UpsertResponse,
+    FetchResponse,
+    ListResponse,
+)
 from .exceptions import IndexNotFoundError
 
-__all__ = ["PineconeClient", "Serverless", "PineconePod", "IndexResponse", "IndexNotFoundError"]
-__version__ = "0.1.0"
+__all__ = [
+    "PineconeClient",
+    "PineconeIndex",
+    "Serverless",
+    "PineconePod",
+    "IndexResponse",
+    "PineconeVector",
+    "VectorMetadata",
+    "SparseValues",
+    "QueryResponse",
+    "UpsertResponse",
+    "FetchResponse",
+    "ListResponse",
+    "IndexNotFoundError",
+    
+]
