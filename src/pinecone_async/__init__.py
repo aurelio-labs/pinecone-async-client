@@ -1,4 +1,3 @@
-# src/pinecone_async/__init__.py
 from .client import PineconeClient
 from .index import PineconeIndex
 from .schema import (
