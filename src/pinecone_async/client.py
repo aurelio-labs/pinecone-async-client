@@ -1,10 +1,10 @@
 import os
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional
 
 import httpx
 
 from pinecone_async.exceptions import IndexNotFoundError
-from pinecone_async.schema import IndexResponse, PineconePod, Serverless
+from pinecone_async.schema import Document, IndexResponse, PineconePod, RerankParameters, RerankRequest, RerankResponse, Serverless
 
 
 class PineconeClient:
@@ -99,3 +99,51 @@ class PineconeClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.close()
 
+    async def rerank(
+        self,
+        model: str,
+        query: str,
+        documents: list[dict[str, str]],
+        top_n: Optional[int] = None,
+        return_documents: Optional[bool] = True,
+        parameters: Optional[dict] = None,
+        rank_fields: Optional[list[str]] = None
+    ) -> RerankResponse:
+        """
+        Rerank documents based on their relevance to a query.
+        Args:
+            model: The reranking model to use (e.g., "bge-reranker-v2-m3")
+            query: The query text to compare documents against
+            documents: List of documents to rerank
+            top_n: Number of top results to return
+            return_documents: Whether to include documents in response
+            parameters: Additional parameters like truncation
+            rank_fields: Optional list of custom fields to rank on
+        """
+        headers = {
+            "Api-Key": self.headers["Api-Key"],
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-Pinecone-API-Version": "2024-10"
+        }
+
+        request = RerankRequest(
+            model=model,
+            query=query,
+            documents=[Document(**doc) for doc in documents],
+            top_n=top_n,
+            return_documents=return_documents,
+            parameters=RerankParameters(**(parameters or {})),
+            rank_fields=rank_fields
+        )
+
+        async with httpx.AsyncClient(headers=headers) as client:
+            response = await client.post(
+                "https://api.pinecone.io/rerank",
+                json=request.model_dump(exclude_none=True)
+            )
+            
+            if response.status_code == 200:
+                return RerankResponse(**response.json())
+            else:
+                raise Exception(f"Failed to rerank: {response.status_code} : {response.text}")
