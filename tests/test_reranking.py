@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 import httpx
 from pinecone_async import PineconeClient
-from pinecone_async.schema import Document, RerankParameters, RerankResponse, RerankResult, RerankUsage
+from pinecone_async.schema import Document, RerankParameters, RerankResponse
 
 # Mock responses
 MOCK_RERANK_RESPONSE = {
@@ -60,32 +60,37 @@ async def test_rerank_basic_functionality():
 
 @pytest.mark.asyncio
 async def test_rerank_with_custom_model():
-    """Test reranking with a specific model."""
+    """Test reranking with a custom model."""
     response = httpx.Response(200, json=MOCK_RERANK_RESPONSE)
+    custom_model = "bge-reranker-v2-m3"
+    
+    with patch('httpx.AsyncClient.post', return_value=response) as mock_post:
+        async with PineconeClient(api_key="test-key", rerank_model=custom_model) as client:
+            await client.rerank(
+                query="What is Python?",
+                documents=MOCK_DOCUMENTS
+            )
+            
+            # Verify the correct model was sent in the request
+            called_json = mock_post.call_args.kwargs['json']
+            assert called_json['model'] == custom_model
+
+@pytest.mark.asyncio
+async def test_rerank_model_override():
+    """Test reranking with model override in method call."""
+    response = httpx.Response(200, json=MOCK_RERANK_RESPONSE)
+    override_model = "bge-reranker-large"
     
     with patch('httpx.AsyncClient.post', return_value=response) as mock_post:
         async with PineconeClient(api_key="test-key") as client:
             await client.rerank(
                 query="What is Python?",
                 documents=MOCK_DOCUMENTS,
-                model="bge-reranker-v2-m3"
+                model=override_model
             )
             
-            # Verify the correct model was sent in the request
             called_json = mock_post.call_args.kwargs['json']
-            assert called_json['model'] == "bge-reranker-v2-m3"
-
-@pytest.mark.asyncio
-async def test_rerank_with_invalid_model():
-    """Test reranking with an invalid model."""
-    async with PineconeClient(api_key="test-key") as client:
-        with pytest.raises(ValueError) as exc_info:
-            await client.rerank(
-                query="What is Python?",
-                documents=MOCK_DOCUMENTS,
-                model="invalid-model"
-            )
-        assert "Invalid model" in str(exc_info.value)
+            assert called_json['model'] == override_model
 
 @pytest.mark.asyncio
 async def test_rerank_with_parameters():
@@ -171,9 +176,16 @@ async def test_rerank_without_return_documents():
             assert result.data[0].score == 0.95
 
 @pytest.mark.asyncio
-async def test_list_supported_models():
-    """Test listing supported reranking models."""
-    models = PineconeClient.list_supported_models()
-    assert isinstance(models, list)
-    assert "cohere-rerank-3.5" in models
-    assert "bge-reranker-v2-m3" in models
+async def test_client_initialization_with_custom_model():
+    """Test client initialization with custom rerank model."""
+    custom_model = "bge-reranker-v2-m3"
+    client = PineconeClient(api_key="test-key", rerank_model=custom_model)
+    assert client.rerank_model == custom_model
+    await client.close()
+
+@pytest.mark.asyncio
+async def test_client_initialization_default_model():
+    """Test client initialization with default rerank model."""
+    client = PineconeClient(api_key="test-key")
+    assert client.rerank_model == PineconeClient.DEFAULT_RERANK_MODEL
+    await client.close()

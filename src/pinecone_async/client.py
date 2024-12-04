@@ -2,24 +2,19 @@ from typing import Any, Dict, List, Literal, Optional
 import os
 import httpx
 from pinecone_async.exceptions import IndexNotFoundError
-from pinecone_async.schema import IndexResponse, PineconePod, Serverless
+from pinecone_async.schema import IndexResponse, PineconePod, Serverless, Document, RerankParameters, RerankRequest, RerankResponse
 
 
 class PineconeClient:
     """Async client for Pinecone API."""
     
-    RERANK_MODELS = {
-        "cohere-rerank-3.5": "cohere-rerank-3.5",
-        "bge-reranker-base": "bge-reranker-base",
-        "bge-reranker-large": "bge-reranker-large",
-        "bge-reranker-v2-m3": "bge-reranker-v2-m3"
-    }
-    DEFAULT_MODEL = "cohere-rerank-3.5"
+    DEFAULT_RERANK_MODEL = "cohere-rerank-3.5"
 
     def __init__(
         self,
         api_key: str | None = None,
         base_url: str = "https://api.pinecone.io",
+        rerank_model: str | None = None,
     ):
         self.headers = {
             "Api-Key": api_key,
@@ -27,6 +22,7 @@ class PineconeClient:
             "X-Pinecone-API-Version": "2024-07",
         }
         self.api_key = api_key or os.getenv("PINECONE_API_KEY")
+        self.rerank_model = rerank_model or self.DEFAULT_RERANK_MODEL
 
         if not self.api_key:
             raise ValueError(
@@ -37,7 +33,6 @@ class PineconeClient:
         self.base_url = base_url
         self.client = httpx.AsyncClient(headers=self.headers)
         
-
     async def list_indexes(self) -> List[Dict[str, Any]]:
         response = await self.client.get(f"{self.base_url}/indexes")
         if response.status_code != 200:
@@ -118,17 +113,17 @@ class PineconeClient:
     ) -> RerankResponse:
         """
         Rerank documents based on their relevance to a query.
+        Args:
+            query: The query text to compare documents against
+            documents: List of documents to rerank
+            model: Optional model override (defaults to client's rerank_model)
+            top_n: Number of top results to return
+            return_documents: Whether to include documents in response
+            parameters: Additional parameters like truncation
+            rank_fields: Optional list of custom fields to rank on
         """
         if not documents:
             raise ValueError("documents cannot be empty")
-
-        # Use default model if none specified or validate provided model
-        if model is None:
-            model = self.DEFAULT_MODEL
-        elif model not in self.RERANK_MODELS:
-            raise ValueError(
-                f"Invalid model. Supported models are: {', '.join(self.RERANK_MODELS.keys())}"
-            )
 
         headers = {
             "Api-Key": self.headers["Api-Key"],
@@ -138,7 +133,7 @@ class PineconeClient:
         }
 
         request = RerankRequest(
-            model=model,
+            model=model or self.rerank_model,
             query=query,
             documents=[Document(**doc) for doc in documents],
             top_n=top_n,
@@ -157,6 +152,7 @@ class PineconeClient:
                 return RerankResponse(**response.json())
             else:
                 raise Exception(f"Failed to rerank: {response.status_code} : {response.text}")
+
 
     @classmethod
     def list_supported_models(cls) -> list[str]:
