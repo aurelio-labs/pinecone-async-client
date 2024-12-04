@@ -122,6 +122,7 @@ class PineconeClient:
             parameters: Additional parameters like truncation
             rank_fields: Optional list of custom fields to rank on
         """
+
         if not documents:
             raise ValueError("documents cannot be empty")
 
@@ -153,8 +154,8 @@ class PineconeClient:
             else:
                 raise Exception(f"Failed to rerank: {response.status_code} : {response.text}")
 
-
     @classmethod
     def list_supported_models(cls) -> list[str]:
         """Returns a list of supported reranking models."""
         return list(cls.RERANK_MODELS.keys())
+

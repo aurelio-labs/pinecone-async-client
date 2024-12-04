@@ -156,10 +156,8 @@ class RerankResult(BaseModel):
     score: float
 
 class RerankUsage(BaseModel):
-    """Usage information for reranking operation."""
     rerank_units: int
 
 class RerankResponse(BaseModel):
-    """Response structure for reranking operation."""
-    data: List[RerankResult]
+    data: list[RerankResult]
     usage: RerankUsage
