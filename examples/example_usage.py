@@ -1,6 +1,6 @@
 import asyncio
 import os
-from pinecone_async import PineconeClient
+from pinecone_async.client import PineconeClient
 
 async def list_indexes_example():
     api_key = os.getenv("PINECONE_API_KEY")

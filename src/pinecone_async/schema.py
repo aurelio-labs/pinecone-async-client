@@ -126,26 +126,31 @@ class FetchResponse(BaseModel):
     vectors: Dict[str, PineconeVector]
     namespace: Optional[str] = None
     
-    
-    
 class Document(BaseModel):
+    """A document for reranking."""
     id: str
-    text: str | None = None
-    my_field: str | None = None  # For custom field support
+    text: str
+    source: Optional[str] = None
+    custom_field: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 class RerankParameters(BaseModel):
+    """Parameters for reranking operation."""
     truncate: Optional[Literal["START", "END", "NONE"]] = "END"
+    chunk_size: Optional[int] = None
 
 class RerankRequest(BaseModel):
+    """Request structure for reranking operation."""
     model: str
     query: str
-    documents: list[Document]
+    documents: List[Document]
     top_n: Optional[int] = None
     return_documents: Optional[bool] = True
     parameters: Optional[RerankParameters] = None
-    rank_fields: Optional[list[str]] = None
+    rank_fields: Optional[List[str]] = None
 
 class RerankResult(BaseModel):
+    """Individual result from reranking operation."""
     index: int
     document: Optional[Document] = None
     score: float

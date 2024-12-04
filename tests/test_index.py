@@ -1,4 +1,3 @@
-# tests/test_index.py
 import pytest
 import pytest_asyncio
 pytestmark = pytest.mark.asyncio
