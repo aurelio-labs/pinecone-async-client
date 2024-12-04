@@ -125,3 +125,34 @@ class FetchResponse(BaseModel):
     """Response from fetch operation"""
     vectors: Dict[str, PineconeVector]
     namespace: Optional[str] = None
+    
+    
+    
+class Document(BaseModel):
+    id: str
+    text: str | None = None
+    my_field: str | None = None  # For custom field support
+
+class RerankParameters(BaseModel):
+    truncate: Optional[Literal["START", "END", "NONE"]] = "END"
+
+class RerankRequest(BaseModel):
+    model: str
+    query: str
+    documents: list[Document]
+    top_n: Optional[int] = None
+    return_documents: Optional[bool] = True
+    parameters: Optional[RerankParameters] = None
+    rank_fields: Optional[list[str]] = None
+
+class RerankResult(BaseModel):
+    index: int
+    document: Optional[Document] = None
+    score: float
+
+class RerankUsage(BaseModel):
+    rerank_units: int
+
+class RerankResponse(BaseModel):
+    data: list[RerankResult]
+    usage: RerankUsage

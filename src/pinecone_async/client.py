@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Literal, Optional
 import os
 import httpx
 from pinecone_async.exceptions import IndexNotFoundError
-from pinecone_async.schema import IndexResponse, PineconePod, Serverless
+from pinecone_async.schema import Document, IndexResponse, PineconePod, RerankParameters, RerankRequest, RerankResponse, Serverless
 
 
 class PineconeClient:
@@ -118,7 +118,16 @@ class PineconeClient:
     ) -> RerankResponse:
         """
         Rerank documents based on their relevance to a query.
+        Args:
+            model: The reranking model to use (e.g., "bge-reranker-v2-m3")
+            query: The query text to compare documents against
+            documents: List of documents to rerank
+            top_n: Number of top results to return
+            return_documents: Whether to include documents in response
+            parameters: Additional parameters like truncation
+            rank_fields: Optional list of custom fields to rank on
         """
+
         if not documents:
             raise ValueError("documents cannot be empty")
 
@@ -157,8 +166,9 @@ class PineconeClient:
                 return RerankResponse(**response.json())
             else:
                 raise Exception(f"Failed to rerank: {response.status_code} : {response.text}")
-
+                
     @classmethod
     def list_supported_models(cls) -> list[str]:
         """Returns a list of supported reranking models."""
         return list(cls.RERANK_MODELS.keys())
+
