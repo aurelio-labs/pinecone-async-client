@@ -139,7 +139,7 @@ class PineconeClient:
             documents=[Document(**doc) for doc in documents],
             top_n=top_n,
             return_documents=return_documents,
-            parameters=RerankParameters(**(parameters or {})),
+            parameters=RerankParameters(**parameters) if parameters else None,
             rank_fields=rank_fields
         )
 
@@ -158,4 +158,3 @@ class PineconeClient:
     def list_supported_models(cls) -> list[str]:
         """Returns a list of supported reranking models."""
         return list(cls.RERANK_MODELS.keys())
-
