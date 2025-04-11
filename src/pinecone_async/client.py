@@ -143,16 +143,16 @@ class PineconeClient:
             rank_fields=rank_fields
         )
 
-        async with httpx.AsyncClient(headers=headers) as client:
-            response = await client.post(
-                "https://api.pinecone.io/rerank",
-                json=request.model_dump(exclude_none=True)
-            )
-            
-            if response.status_code == 200:
-                return RerankResponse(**response.json())
-            else:
-                raise Exception(f"Failed to rerank: {response.status_code} : {response.text}")
+
+        response = await self.client.post(
+            "https://api.pinecone.io/rerank",
+            json=request.model_dump(exclude_none=True)
+        )
+        
+        if response.status_code == 200:
+            return RerankResponse(**response.json())
+        else:
+            raise Exception(f"Failed to rerank: {response.status_code} : {response.text}")
 
     @classmethod
     def list_supported_models(cls) -> list[str]:
